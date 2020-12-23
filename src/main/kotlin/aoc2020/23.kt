@@ -12,29 +12,25 @@ fun main() {
 
 private fun solve(startCups: String, numberOfCups: Int, rounds: Int): String {
     val circle = getCircle(startCups, numberOfCups)
-    val links = mutableSetOf<Link>()
-    val labelToLink = mutableMapOf<Int, Link>()
+    val labelToNext = mutableMapOf<Int, Int>()
     for (i in circle.indices) {
         val next = (i + 1) % circle.size
-        val link = Link(circle[i], circle[next])
-        links.add(link)
-        labelToLink[link.label] = link
+        labelToNext[circle[i]] = circle[next]
     }
 
-    var current = labelToLink[circle[0]]!!
+    var current = circle[0]
     for (i in 1..rounds) {
-        val first = labelToLink[current.next]!!
-        val second = labelToLink[first.next]!!
-        val third = labelToLink[second.next]!!
-        current.next = third.next
-        val picked = setOf(first, second, third).map { it.label }
-        val dest = getDest(current.label, picked, numberOfCups)
-        val destLink = labelToLink[dest]!!
-        third.next = destLink.next
-        destLink.next = first.label
-        current = labelToLink[current.next]!!
+        val first = labelToNext[current]!!
+        val second = labelToNext[first]!!
+        val third = labelToNext[second]!!
+        labelToNext[current] = labelToNext[third]!!
+        val picked = setOf(first, second, third)
+        val dest = getDest(current, picked, numberOfCups)
+        labelToNext[third] = labelToNext[dest]!!
+        labelToNext[dest] = first
+        current = labelToNext[current]!!
     }
-    return getResult(labelToLink, numberOfCups)
+    return getResult(labelToNext, numberOfCups)
 }
 
 private fun getCircle(startCups: String, numberOfCups: Int): List<Int> {
@@ -45,7 +41,7 @@ private fun getCircle(startCups: String, numberOfCups: Int): List<Int> {
     return circle
 }
 
-private fun getDest(currentCup: Int, picked: List<Int>, numberOfCups: Int): Int {
+private fun getDest(currentCup: Int, picked: Set<Int>, numberOfCups: Int): Int {
     var dest = currentCup - 1
     while (dest < 1 || picked.contains(dest)) {
         if (dest < 1) {
@@ -57,20 +53,20 @@ private fun getDest(currentCup: Int, picked: List<Int>, numberOfCups: Int): Int 
     return dest
 }
 
-private fun getResult(labelToLink: MutableMap<Int, Link>, numberOfCups: Int): String {
-    val start = labelToLink[1]!!
+private fun getResult(labelToLink: MutableMap<Int, Int>, numberOfCups: Int): String {
+    val start = 1
     if (numberOfCups == 9) {
-        var next = labelToLink[start.next]!!
+        var next = labelToLink[start]!!
         val res = StringBuilder()
-        while (next.label != 1) {
-            res.append(next.label)
-            next = labelToLink[next.next]!!
+        while (next != 1) {
+            res.append(next)
+            next = labelToLink[next]!!
         }
         return res.toString()
     }
-    val a = labelToLink[start.next]!!
-    val b = labelToLink[a.next]!!
-    return (a.label.toLong() * b.label.toLong()).toString()
+    val a = labelToLink[start]!!
+    val b = labelToLink[a]!!
+    return (a.toLong() * b.toLong()).toString()
 }
 
 data class Link(val label: Int, var next: Int)
