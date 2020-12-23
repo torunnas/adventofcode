@@ -68,5 +68,3 @@ private fun getResult(labelToLink: MutableMap<Int, Int>, numberOfCups: Int): Str
     val b = labelToLink[a]!!
     return (a.toLong() * b.toLong()).toString()
 }
-
-data class Link(val label: Int, var next: Int)
