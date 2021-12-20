@@ -48,7 +48,7 @@ fun main() {
     }
 }
 
-fun getBoard(lines: List<String>): Array<IntArray> {
+private fun getBoard(lines: List<String>): Array<IntArray> {
     val board = Array(lines.size) { IntArray(lines[0].length) }
     for ((i, line) in lines.withIndex()) {
         val row = IntArray(10)
